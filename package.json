@@ -1,0 +1,57 @@
+{
+  "name": "resonaboo-backend",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": "Nathan",
+  "type": "module",
+  "main": "./src/index.ts",
+  "private": true,
+  "scripts": {
+    "lint": "biome check",
+    "format": "biome format --write --fix",
+    "auth:generate": "npx auth@latest generate --config ./src/api/auth.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:pull": "drizzle-kit pull",
+    "db:upsert": "tsx --env-file=.env ./src/seed.ts",
+    "db:studio": "drizzle-kit studio",
+    "generate:types": "openapi-typescript https://raw.githubusercontent.com/bluenviron/mediamtx/refs/tags/v1.19.0/api/openapi.yaml -o ./src/types/api.ts",
+    "watch": "node --watch --experimental-transform-types --env-file=.env .",
+    "start": "node --experimental-transform-types --env-file=.env ."
+  },
+  "dependencies": {
+    "@better-auth/drizzle-adapter": "latest",
+    "@fastify/cors": "latest",
+    "@fastify/swagger": "latest",
+    "@scalar/fastify-api-reference": "latest",
+    "bcrypt": "latest",
+    "better-auth": "latest",
+    "chalk": "latest",
+    "dotenv": "latest",
+    "drizzle-kit": "latest",
+    "drizzle-orm": "latest",
+    "fastify": "latest",
+    "fastify-plugin": "latest",
+    "fastify-type-provider-zod": "latest",
+    "http-status-codes": "latest",
+    "openapi-fetch": "latest",
+    "pg": "latest",
+    "uuidv7": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "@types/bcrypt": "latest",
+    "@types/node": "latest",
+    "openapi-typescript": "latest"
+  },
+  "imports": {
+    "#api": ["./src/api/index.ts"],
+    "#db": ["./src/db/index.ts"],
+    "#env": ["./src/env.ts"],
+    "#services": ["./src/services/index.ts"],
+    "#types": ["./src/types/index.ts"],
+    "#utils": ["./src/utils/index.ts"]
+  }
+}

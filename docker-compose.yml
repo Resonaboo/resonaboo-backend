@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:18.3
+    container_name: resonaboo-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: resonaboo
+      POSTGRES_PASSWORD: resonaboo
+      POSTGRES_DB: resonaboo
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: resonaboo-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@resonaboo.com
+      PGADMIN_DEFAULT_PASSWORD: resonaboo
+    depends_on:
+      - db
