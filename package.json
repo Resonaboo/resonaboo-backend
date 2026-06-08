@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "latest",
+    "@fastify/cookie": "latest",
     "@fastify/cors": "latest",
     "@fastify/swagger": "latest",
     "@scalar/fastify-api-reference": "latest",
@@ -47,11 +48,23 @@
     "openapi-typescript": "latest"
   },
   "imports": {
-    "#api": ["./src/api/index.ts"],
-    "#db": ["./src/db/index.ts"],
-    "#env": ["./src/env.ts"],
-    "#services": ["./src/services/index.ts"],
-    "#types": ["./src/types/index.ts"],
-    "#utils": ["./src/utils/index.ts"]
+    "#api": [
+      "./src/api/index.ts"
+    ],
+    "#db": [
+      "./src/db/index.ts"
+    ],
+    "#env": [
+      "./src/env.ts"
+    ],
+    "#services": [
+      "./src/services/index.ts"
+    ],
+    "#types": [
+      "./src/types/index.ts"
+    ],
+    "#utils": [
+      "./src/utils/index.ts"
+    ]
   }
 }

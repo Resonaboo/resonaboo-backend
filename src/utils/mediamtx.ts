@@ -5,9 +5,9 @@ const getBaseUrl = () => {
   return "http://localhost:9997";
 };
 
-const client = createClient<paths>({ 
+const client = createClient<paths>({
   baseUrl: getBaseUrl(),
-  credentials: "include"
+  credentials: "include",
 });
 
 export const useApi = () => client;

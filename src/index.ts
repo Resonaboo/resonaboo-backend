@@ -6,6 +6,7 @@ import {
   type ZodTypeProvider,
 } from "fastify-type-provider-zod";
 import { fastifySwagger } from "@fastify/swagger";
+import fastifyCookie from "@fastify/cookie";
 import { fastifyCors } from "@fastify/cors";
 import ScalarApiReference from "@scalar/fastify-api-reference";
 import { registerRoutes } from "#api";
@@ -16,10 +17,18 @@ const app = fastify().withTypeProvider<ZodTypeProvider>();
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
+await app.register(fastifyCookie, {
+  //secret: "",
+  hook: "onRequest",
+  parseOptions: {}
+});
+
 await app.register(fastifyCors, {
   origin: true,
   methods: ["GET", "POST", "DELETE"],
-  //credentials: true
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  credentials: true,
+  maxAge: 86400,
 });
 
 await app.register(fastifySwagger, {
