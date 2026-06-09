@@ -2,6 +2,8 @@ import { db } from "#db";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import * as bcrypt from "bcrypt";
 import { betterAuth } from "better-auth";
+import { fromNodeHeaders } from "better-auth/node";
+import type { FastifyRequest } from "fastify/types/request.ts";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -26,3 +28,11 @@ export const auth = betterAuth({
     },
   },
 });
+
+export async function isAuthenticated(request: FastifyRequest) {
+  const session = await auth.api.getSession({
+    headers: fromNodeHeaders(request.headers),
+  });
+
+  return session;
+}

@@ -7,7 +7,7 @@ import { StatusCodes } from "http-status-codes";
 export function authRoute(app: FastifyTypedInstance) {
   app.route({
     method: ["GET", "POST"],
-    url: "/api/auth/*",
+    url: "/auth/*",
     async handler(request, reply) {
       try {
         // Construct request URL

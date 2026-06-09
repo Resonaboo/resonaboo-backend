@@ -1,8 +1,9 @@
 import { relations } from "drizzle-orm";
 import { pgTable, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core";
-import { accounts } from "./accounts.js";
-import { sessions } from "./sessions.js";
+import { accounts } from "./accounts.ts";
+import { sessions } from "./sessions.ts";
 import { uuidv7 } from "uuidv7";
+import { mediamtx } from "./mediamtx.ts";
 
 export const users = pgTable("users", {
   id: uuid("id")
@@ -18,7 +19,8 @@ export const users = pgTable("users", {
     .notNull(),
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   sessions: many(sessions),
   accounts: many(accounts),
+  paths: one(mediamtx)
 }));
