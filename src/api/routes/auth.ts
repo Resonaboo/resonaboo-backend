@@ -1,6 +1,6 @@
 import type { FastifyTypedInstance } from "#types";
 import { fromNodeHeaders } from "better-auth/node";
-import { auth } from "#services";
+import { auth } from "#api";
 import z from "zod";
 import { StatusCodes } from "http-status-codes";
 
@@ -82,7 +82,7 @@ export function authRoute(app: FastifyTypedInstance) {
             sameSite: "lax",
             maxAge: 60 * 60 * 24 * 7,
           })
-          .setCookie("userinfo", result.user.name, {
+          .setCookie("auth_info", result.user.name, {
             httpOnly: false,
             sameSite: "lax",
             maxAge: 60 * 60 * 24 * 7,
@@ -129,7 +129,7 @@ export function authRoute(app: FastifyTypedInstance) {
       const { username, email, password } = req.body;
 
       try {
-        await auth.api.signUpEmail({
+        const result = await auth.api.signUpEmail({
           body: {
             name: username,
             email,
@@ -142,7 +142,7 @@ export function authRoute(app: FastifyTypedInstance) {
         app.log.error("Authentication Error:", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
           status: "error",
-          error: "Internal authentication error",
+          error: `${error}`,
           code: "AUTH_FAILURE",
         });
       }
@@ -153,11 +153,11 @@ export function authRoute(app: FastifyTypedInstance) {
     "/auth/logout",
     {
       schema: {
-        summary: "Register",
-        description: "Register to the API.",
+        summary: "Logout",
+        description: "Logout from the API.",
         tags: ["auth"],
         response: {
-          204: {},
+          204: z.object({}),
           500: z.object({
             status: z.string(),
             error: z.string(),
@@ -172,7 +172,7 @@ export function authRoute(app: FastifyTypedInstance) {
           headers: fromNodeHeaders(req.headers)
         });
 
-        return res.status(StatusCodes.NO_CONTENT).send();
+        return res.status(StatusCodes.NO_CONTENT).send({});
       } catch (error: any) {
         app.log.error("Authentication Error:", error);
         return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({

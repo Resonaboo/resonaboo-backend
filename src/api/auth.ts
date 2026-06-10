@@ -24,12 +24,18 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7,
     cookieCache: {
       enabled: true,
-      maxAge: 60 * 10,
+      maxAge: 60 * 60 * 24 * 7,
     },
   },
+  advanced: {
+    database: {
+      generateId: "uuid",
+    },
+  },
+  
 });
 
-export async function isAuthenticated(request: FastifyRequest) {
+export async function getSession(request: FastifyRequest) {
   const session = await auth.api.getSession({
     headers: fromNodeHeaders(request.headers),
   });

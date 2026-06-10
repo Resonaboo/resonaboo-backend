@@ -1,21 +1,23 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { pgTable, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core";
 import { accounts } from "./accounts.ts";
 import { sessions } from "./sessions.ts";
-import { uuidv7 } from "uuidv7";
 import { mediamtx } from "./mediamtx.ts";
+import { uuidv7 } from "uuidv7";
 
 export const users = pgTable("users", {
   id: uuid("id")
-    .primaryKey()
-    .$defaultFn(() => uuidv7()),
+    .default(sql`uuidv7()`)
+    .$defaultFn(() => uuidv7())
+    .primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
-  createdAt: timestamp("created_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
-    .$onUpdate(() => new Date())
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 });
 

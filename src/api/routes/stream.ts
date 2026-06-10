@@ -1,4 +1,4 @@
-import { isAuthenticated } from "#services";
+import { getSession } from "#api";
 import type { FastifyTypedInstance } from "#types";
 import { useApi } from "#utils";
 import { StatusCodes } from "http-status-codes";
@@ -28,7 +28,7 @@ export function streamRoute(app: FastifyTypedInstance) {
       },
     },
     async (req, res) => {
-      const session = await isAuthenticated(req);
+      const session = await getSession(req);
       if (!session) {
         return res.status(StatusCodes.UNAUTHORIZED).send({ status: "Unauthorized" });
       }
@@ -44,7 +44,7 @@ export function streamRoute(app: FastifyTypedInstance) {
       }
     }
   );
-
+/*
   app.get(
     "/stream",
     {
@@ -79,4 +79,5 @@ export function streamRoute(app: FastifyTypedInstance) {
       });
     }
   );
+*/
 }
