@@ -79,12 +79,14 @@ export function authRoute(app: FastifyTypedInstance) {
         return res
           .setCookie("auth_token", result.token, {
             httpOnly: true,
+            path: "/",
             sameSite: "lax",
             maxAge: 60 * 60 * 24 * 7,
           })
           .setCookie("auth_info", result.user.name, {
             httpOnly: false,
             sameSite: "lax",
+            path: "/",
             maxAge: 60 * 60 * 24 * 7,
           })
           .status(StatusCodes.OK)
