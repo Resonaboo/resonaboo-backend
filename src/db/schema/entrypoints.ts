@@ -1,4 +1,4 @@
-import { users } from "#db";
+import { users } from "./users.ts";
 import { relations } from "drizzle-orm";
 import { pgTable, serial, uuid, varchar } from "drizzle-orm/pg-core";
 import { endpoints } from "./endpoints.ts";

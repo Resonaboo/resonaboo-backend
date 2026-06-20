@@ -1,9 +1,9 @@
 import { relations, sql } from "drizzle-orm";
 import { pgTable, text, boolean, uuid, pgEnum, varchar } from "drizzle-orm/pg-core";
 import { entrypoints } from "./entrypoints.ts";
-//import { uuidv7 } from "uuidv7";
+import { endpoints } from "./endpoints.ts";
 
-const userRole = pgEnum("role", [
+export const userRole = pgEnum("role", [
   "owner",
   "customer"
 ]);
@@ -21,4 +21,5 @@ export const users = pgTable("users", {
 
 export const usersRelations = relations(users, ({ many }) => ({
   entrypoints: many(entrypoints),
+  endpoints: many(endpoints),
 }));

@@ -42,7 +42,7 @@
   "devDependencies": {
     "@biomejs/biome": "latest",
     "@types/bcrypt": "latest",
-    "@types/jsonwebtoken": "^9.0.10",
+    "@types/jsonwebtoken": "latest",
     "@types/node": "latest",
     "openapi-typescript": "latest"
   },

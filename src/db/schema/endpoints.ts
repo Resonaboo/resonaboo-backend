@@ -1,8 +1,8 @@
-import { users } from "#db";
+import { users } from "./users.ts";
 import { relations } from "drizzle-orm";
 import { pgTable, serial, uuid, varchar } from "drizzle-orm/pg-core";
 
-export const endpoints = pgTable("entrypoints", {
+export const endpoints = pgTable("endpoints", {
     id: serial("id").notNull().primaryKey(),
     key: varchar("key").unique(),
     uri: varchar("uri"),

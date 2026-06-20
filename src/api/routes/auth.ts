@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
 import { db, users } from "#db";
 import { eq } from "drizzle-orm";
-import { generateToken } from "#services";
+import { generateToken, userExists } from "#services";
 
 function maskEmail(email: string) {
   const visibleCount = Math.min(3, email.length);
@@ -50,7 +50,7 @@ export function authRoute(app: FastifyTypedInstance) {
 
         const auth = u[0];
         const isPassValid = await bcrypt.compare(password, auth.password);
-        if (isPassValid)
+        if (!isPassValid)
           return res
             .status(StatusCodes.UNAUTHORIZED)
             .send({ error: "Invalid credentials" });
@@ -114,21 +114,20 @@ export function authRoute(app: FastifyTypedInstance) {
       const bcpassword = await bcrypt.hash(password, 10);
 
       try {
-        const u = await db
-          .select({ email: users.email })
-          .from(users)
-          .where(eq(users.email, email))
-          .limit(1);
+        const exist = await userExists(email);
 
-        if (u.length > 0)
+        if (exist)
           return res.status(StatusCodes.BAD_REQUEST).send({
             error: "Email already registered",
           });
 
         await db.insert(users).values({
-          email,
-          username,
+          id: undefined,
+          username: username,
+          email: email,
+          emailVerified: false,
           password: bcpassword,
+          role: "customer"
         });
 
         return res.status(StatusCodes.CREATED).send({});
