@@ -28,6 +28,7 @@ function validateEnv<T extends ZodRawShape>(schema: ZodObject<T>) {
 
 export const env = validateEnv(
   z.object({
+    AUTH_SECRET: z.string("Auth secret key is required").min(1),
     DATABASE_URL: z.string("Database url is required").min(1),
   }),
 );

@@ -1,28 +1,24 @@
 import { relations, sql } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core";
-import { accounts } from "./accounts.ts";
-import { sessions } from "./sessions.ts";
+import { pgTable, text, boolean, uuid, pgEnum, varchar } from "drizzle-orm/pg-core";
 import { entrypoints } from "./entrypoints.ts";
-import { uuidv7 } from "uuidv7";
+//import { uuidv7 } from "uuidv7";
+
+const userRole = pgEnum("role", [
+  "owner",
+  "customer"
+]);
 
 export const users = pgTable("users", {
   id: uuid("id")
     .default(sql`uuidv7()`)
-    .$defaultFn(() => uuidv7())
     .primaryKey(),
-  name: text("name").notNull(),
+  username: varchar("username", { length: 16 }).notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
-  image: text("image"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => /* @__PURE__ */ new Date())
-    .notNull(),
+  password: text("password").notNull(),
+  role: userRole("role").default("customer").notNull()
 });
 
-export const usersRelations = relations(users, ({ many, one }) => ({
-  sessions: many(sessions),
-  accounts: many(accounts),
+export const usersRelations = relations(users, ({ many }) => ({
   entrypoints: many(entrypoints),
 }));
