@@ -1,16 +1,13 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { pgTable, text, timestamp, index, uuid } from "drizzle-orm/pg-core";
-import { users } from "./users.js";
-import { uuidv7 } from "uuidv7";
+import { users } from "./users.ts";
 
 export const accounts = pgTable(
   "accounts",
   {
-    id: uuid("id")
-      .primaryKey()
-      .$defaultFn(() => uuidv7()),
-    accountId: uuid("account_id").notNull(),
-    providerId: uuid("provider_id").notNull(),
+    id: uuid("id").default(sql`uuidv7()`).primaryKey(),
+    accountId: text("account_id").notNull(),
+    providerId: text("provider_id").notNull(),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -21,9 +18,9 @@ export const accounts = pgTable(
     refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
     scope: text("scope"),
     password: text("password"),
-    createdAt: timestamp("created_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
-      .$onUpdate(() => new Date())
+      .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
   (table) => [index("accounts_userId_idx").on(table.userId)],

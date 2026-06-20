@@ -1,19 +1,16 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { pgTable, text, timestamp, index, uuid } from "drizzle-orm/pg-core";
-import { users } from "./users.js";
-import { uuidv7 } from "uuidv7";
+import { users } from "./users.ts";
 
 export const sessions = pgTable(
   "sessions",
   {
-    id: uuid("id")
-      .primaryKey()
-      .$defaultFn(() => uuidv7()),
+    id: uuid("id").default(sql`uuidv7()`).primaryKey(),
     expiresAt: timestamp("expires_at").notNull(),
     token: text("token").notNull().unique(),
-    createdAt: timestamp("created_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
-      .$onUpdate(() => new Date())
+      .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),

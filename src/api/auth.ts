@@ -2,6 +2,8 @@ import { db } from "#db";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import * as bcrypt from "bcrypt";
 import { betterAuth } from "better-auth";
+import { fromNodeHeaders } from "better-auth/node";
+import type { FastifyRequest } from "fastify/types/request.ts";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -22,7 +24,21 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7,
     cookieCache: {
       enabled: true,
-      maxAge: 60 * 10,
+      maxAge: 60 * 60 * 24 * 7,
     },
   },
+  advanced: {
+    database: {
+      generateId: "uuid",
+    },
+  },
+  
 });
+
+export async function getSession(request: FastifyRequest) {
+  const session = await auth.api.getSession({
+    headers: fromNodeHeaders(request.headers),
+  });
+
+  return session;
+}

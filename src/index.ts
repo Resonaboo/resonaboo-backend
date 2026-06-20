@@ -24,9 +24,8 @@ await app.register(fastifyCookie, {
 });
 
 await app.register(fastifyCors, {
-  origin: true,
+  origin: "http://localhost:3000",
   methods: ["GET", "POST", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   credentials: true,
   maxAge: 86400,
 });
