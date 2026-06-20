@@ -1,7 +1,8 @@
 import { relations } from "drizzle-orm";
 import { pgTable, text, timestamp, boolean, uuid } from "drizzle-orm/pg-core";
-import { accounts } from "./accounts.js";
-import { sessions } from "./sessions.js";
+import { accounts } from "./accounts.ts";
+import { sessions } from "./sessions.ts";
+import { entrypoints } from "./entrypoints.ts";
 import { uuidv7 } from "uuidv7";
 
 export const users = pgTable("users", {
@@ -21,4 +22,5 @@ export const users = pgTable("users", {
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   accounts: many(accounts),
+  entrypoints: many(entrypoints),
 }));

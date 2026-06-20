@@ -4,7 +4,7 @@ import z from "zod";
 
 export function homeRoute(app: FastifyTypedInstance) {
   app.get(
-    "/api",
+    "/api/dashboard",
     {
       schema: {
         summary: "Hello, world!",
@@ -18,7 +18,7 @@ export function homeRoute(app: FastifyTypedInstance) {
         },
       },
     },
-    async (_, res) => {
+    async (req, res) => {
       return res.status(StatusCodes.OK).send({
         status: "success",
         data: "Hello, world!",

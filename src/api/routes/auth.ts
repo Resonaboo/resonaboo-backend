@@ -1,6 +1,6 @@
 import type { FastifyTypedInstance } from "#types";
 import { fromNodeHeaders } from "better-auth/node";
-import { auth } from "#services";
+import { auth } from "#api";
 import z from "zod";
 import { StatusCodes } from "http-status-codes";
 
@@ -40,7 +40,7 @@ export function authRoute(app: FastifyTypedInstance) {
   });
 
   app.post(
-    "/auth/login",
+    "/api/auth/login",
     {
       schema: {
         summary: "Login",
@@ -104,7 +104,7 @@ export function authRoute(app: FastifyTypedInstance) {
   );
 
   app.post(
-    "/auth/register",
+    "/api/auth/register",
     {
       schema: {
         summary: "Register",
@@ -150,7 +150,7 @@ export function authRoute(app: FastifyTypedInstance) {
   );
 
   app.post(
-    "/auth/logout",
+    "/api/auth/logout",
     {
       schema: {
         summary: "Register",
