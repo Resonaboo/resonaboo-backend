@@ -10,7 +10,7 @@ import fastifyCookie from "@fastify/cookie";
 import { fastifyCors } from "@fastify/cors";
 import fastifyUserAgent from "fastify-user-agent";
 import ScalarApiReference from "@scalar/fastify-api-reference";
-import { registerMiddlewares, registerRoutes } from "#api";
+import { registerHandlers, registerRoutes } from "#api";
 import ck from "chalk";
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
@@ -49,7 +49,7 @@ await app.register(ScalarApiReference, {
 });
 
 // Rotas
-registerMiddlewares(app);
+registerHandlers(app);
 registerRoutes(app);
 
 await app.ready();

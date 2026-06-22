@@ -17,19 +17,13 @@ export function profileRoute(app: FastifyTypedInstance) {
             data: z.literal("Hello, world!"),
           }),
           401: z.object({
-            error: z.literal("Invalid token"),
+            message: z.string(),
           }),
         },
       },
     },
     async (req, res) => {
-      const userId = await getCredentials(req);
-
-      if (!userId)
-        return res
-          .status(StatusCodes.UNAUTHORIZED)
-          .send({ error: "Invalid token" });
-    
+      const userId = await getCredentials(req);    
           
       return res.status(StatusCodes.OK).send({
         status: "success",

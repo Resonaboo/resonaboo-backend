@@ -4,6 +4,8 @@ import jwt, { type JwtPayload } from "jsonwebtoken";
 import { db, sessions, users } from "#db";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
+import { Exception } from "#utils";
+import { StatusCodes } from "http-status-codes";
 
 export type AuthProps = {
   email: string;
@@ -42,50 +44,41 @@ export function recoverToken(token: string): string | undefined {
   return decodedToken.sub;
 }
 
-export function securityFilters(req: FastifyRequest, res: FastifyReply) {
+export function securityFilters(req: FastifyRequest) {
   const rawToken = req.cookies["auth-token"];
-  if (typeof rawToken !== "string") return false;
+  if (typeof rawToken !== "string")
+    throw new Exception(StatusCodes.UNAUTHORIZED, "Need to sign-in");
 
-  const token =
-    rawToken.startsWith('"') && rawToken.endsWith('"')
-      ? rawToken.slice(1, -1)
-      : rawToken;
-
-  try {
-    recoverToken(token);
-    return true;
-  } catch (error: any) {
-    res.clearCookie("auth-token", { path: "/", sameSite: "lax" });
-    res.clearCookie("user-info", { path: "/", sameSite: "lax" });
-    return false;
-  }
+  if (rawToken.length === 0)
+    throw new Exception(StatusCodes.UNAUTHORIZED, "Need to sign-in");
 }
 
 export async function getCredentials(req: FastifyRequest) {
   const { cookies, userAgent } = req;
   const rawToken = cookies["auth-token"];
-  if (typeof rawToken !== "string") return undefined;
+  if (typeof rawToken !== "string")
+    throw new Exception(StatusCodes.UNAUTHORIZED, "Need sign-in");
 
   const sessionId = await recoverToken(rawToken);
-  if (!sessionId) return undefined;
+  if (!sessionId) throw new Exception(StatusCodes.UNAUTHORIZED, "Invalid session");
 
   const sessionQuery = await db
     .select()
     .from(sessions)
     .where(eq(sessions.id, sessionId));
-  if (sessionQuery.length === 0) return undefined;
+  if (sessionQuery.length === 0) throw new Exception(StatusCodes.UNAUTHORIZED, "Invalid session");
 
   const session = sessionQuery[0];
 
   if (session.ip !== req.ip || session.os !== userAgent.family || session.browser !== userAgent.toAgent())
-    return undefined;
+    if (sessionQuery.length === 0) throw new Exception(StatusCodes.UNAUTHORIZED, "User agent info does not match with session");
 
   return session.fkUserId;
 }
 
 export async function authenticateUser(
   props: AuthProps,
-): Promise<AuthInfo | undefined> {
+): Promise<AuthInfo> {
   const { email, password, ip, os, browser } = props;
 
   const usersQuery = await db
@@ -93,11 +86,11 @@ export async function authenticateUser(
     .from(users)
     .where(eq(users.email, email));
 
-  if (usersQuery.length === 0) return undefined;
+  if (usersQuery.length === 0) throw new Exception(StatusCodes.UNAUTHORIZED, "Invalid credentials");
 
   const user = usersQuery[0];
   const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) return undefined;
+  if (!isPasswordValid) throw new Exception(StatusCodes.UNAUTHORIZED, "Invalid credentials");
 
   const sessionInsert = await db
     .insert(sessions)

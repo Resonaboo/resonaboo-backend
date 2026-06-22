@@ -3,7 +3,9 @@ import z from "zod";
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
 import { db, users } from "#db";
-import { userExists, authenticateUser } from "#services";
+import { authenticateUser } from "#services";
+import { Exception } from "#utils";
+import { eq } from "drizzle-orm";
 
 export function authRoute(app: FastifyTypedInstance) {
   const route = "/api/auth";
@@ -24,10 +26,11 @@ export function authRoute(app: FastifyTypedInstance) {
             status: z.string(),
           }),
           401: z.object({
-            error: z.string(),
+            message: z.string(),
           }),
           500: z.object({
             error: z.string(),
+            message: z.string(),
           }),
         },
       },
@@ -36,48 +39,41 @@ export function authRoute(app: FastifyTypedInstance) {
       const { email, password } = req.body;
       const { userAgent, ip } = req;
 
-      try {
-        const auth = await authenticateUser({
-          email,
-          password,
-          ip,
-          browser: userAgent.toAgent(),
-          os: userAgent.family,
-        });
+      const auth = await authenticateUser({
+        email,
+        password,
+        ip,
+        browser: userAgent.toAgent(),
+        os: userAgent.family,
+      });
 
-        if (!auth)
-          return res
-            .status(StatusCodes.UNAUTHORIZED)
-            .send({ error: "Invalid credentials" });
-
-        const userInfo = {
-          username: auth.username,
-          email: auth.maskedEmail,
-        };
-
+      if (!auth)
         return res
-          .setCookie("auth-token", auth.token, {
-            httpOnly: true,
-            path: "/",
-            sameSite: "lax",
-            maxAge: 60 * 60 * 24 * 14,
-          })
-          .setCookie("user-info", JSON.stringify(userInfo), {
-            httpOnly: false,
-            sameSite: "lax",
-            path: "/",
-            maxAge: 60 * 60 * 24 * 14,
-          })
-          .status(StatusCodes.OK)
-          .send({
-            status: "success",
-          });
-      } catch (error: any) {
-        app.log.error("Authentication Error:", error);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
-          error: "Internal authentication error",
+          .status(StatusCodes.UNAUTHORIZED)
+          .send({ message: "Invalid credentials" });
+
+      const userInfo = {
+        username: auth.username,
+        email: auth.maskedEmail,
+      };
+
+      return res
+        .setCookie("auth-token", auth.token, {
+          httpOnly: true,
+          path: "/",
+          sameSite: "lax",
+          maxAge: 60 * 60 * 24 * 14,
+        })
+        .setCookie("user-info", JSON.stringify(userInfo), {
+          httpOnly: false,
+          sameSite: "lax",
+          path: "/",
+          maxAge: 60 * 60 * 24 * 14,
+        })
+        .status(StatusCodes.OK)
+        .send({
+          status: "success",
         });
-      }
     },
   );
 
@@ -96,10 +92,11 @@ export function authRoute(app: FastifyTypedInstance) {
         response: {
           201: z.object({}),
           400: z.object({
-            error: z.string(),
+            message: z.string(),
           }),
           500: z.object({
             error: z.string(),
+            message: z.string(),
           }),
         },
       },
@@ -108,30 +105,27 @@ export function authRoute(app: FastifyTypedInstance) {
       const { username, email, password } = req.body;
       const bcpassword = await bcrypt.hash(password, 10);
 
-      try {
-        const exist = await userExists(email);
+      const userQuery = await db
+        .select({ email: users.email })
+        .from(users)
+        .where(eq(users.email, email));
 
-        if (exist)
-          return res.status(StatusCodes.BAD_REQUEST).send({
-            error: "Email already registered",
-          });
+      if (userQuery.length > 0)
+        throw new Exception(
+          StatusCodes.BAD_REQUEST,
+          "Email is already registered",
+        );
 
-        await db.insert(users).values({
-          id: undefined,
-          username: username,
-          email: email,
-          emailVerified: false,
-          password: bcpassword,
-          role: "customer",
-        });
+      await db.insert(users).values({
+        id: undefined,
+        username: username,
+        email: email,
+        emailVerified: false,
+        password: bcpassword,
+        role: "customer",
+      });
 
-        return res.status(StatusCodes.CREATED).send({});
-      } catch (error: any) {
-        app.log.error("Authentication Error:", error);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
-          error: `${error}`,
-        });
-      }
+      return res.status(StatusCodes.CREATED).send({});
     },
   );
 
@@ -144,35 +138,21 @@ export function authRoute(app: FastifyTypedInstance) {
         tags: ["auth"],
         response: {
           204: z.object({}),
-          500: z.object({
-            status: z.string(),
-            error: z.string(),
-            code: z.string(),
-          }),
         },
       },
     },
-    async (req, res) => {
-      try {
-        return res
-          .clearCookie("auth-token", {
-            path: "/",
-            sameSite: "lax",
-          })
-          .clearCookie("user-info", {
-            path: "/",
-            sameSite: "lax",
-          })
-          .status(StatusCodes.NO_CONTENT)
-          .send({});
-      } catch (error: any) {
-        app.log.error("Authentication Error:", error);
-        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).send({
-          status: "error",
-          error: "Internal authentication error",
-          code: "AUTH_FAILURE",
-        });
-      }
+    async (_, res) => {
+      return res
+        .clearCookie("auth-token", {
+          path: "/",
+          sameSite: "lax",
+        })
+        .clearCookie("user-info", {
+          path: "/",
+          sameSite: "lax",
+        })
+        .status(StatusCodes.NO_CONTENT)
+        .send({});
     },
   );
 }
