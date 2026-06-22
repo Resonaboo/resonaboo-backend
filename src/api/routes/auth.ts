@@ -3,13 +3,7 @@ import z from "zod";
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
 import { db, users } from "#db";
-import { eq } from "drizzle-orm";
-import { generateToken, userExists } from "#services";
-
-function maskEmail(email: string) {
-  const visibleCount = Math.min(3, email.length);
-  return email.slice(0, visibleCount) + "*".repeat(email.length - visibleCount);
-}
+import { userExists, authenticateUser } from "#services";
 
 export function authRoute(app: FastifyTypedInstance) {
   const route = "/api/auth";
@@ -40,34 +34,35 @@ export function authRoute(app: FastifyTypedInstance) {
     },
     async (req, res) => {
       const { email, password } = req.body;
+      const { userAgent, ip } = req;
 
       try {
-        const u = await db.select().from(users).where(eq(users.email, email));
-        if (u.length === 0)
+        const auth = await authenticateUser({
+          email,
+          password,
+          ip,
+          browser: userAgent.toAgent(),
+          os: userAgent.family,
+        });
+
+        if (!auth)
           return res
             .status(StatusCodes.UNAUTHORIZED)
             .send({ error: "Invalid credentials" });
 
-        const auth = u[0];
-        const isPassValid = await bcrypt.compare(password, auth.password);
-        if (!isPassValid)
-          return res
-            .status(StatusCodes.UNAUTHORIZED)
-            .send({ error: "Invalid credentials" });
-
-        const token = generateToken(auth.email, auth.username, auth.role);
+        const userInfo = {
+          username: auth.username,
+          email: auth.maskedEmail,
+        };
 
         return res
-          .setCookie("auth-token", JSON.stringify(token), {
+          .setCookie("auth-token", auth.token, {
             httpOnly: true,
             path: "/",
             sameSite: "lax",
             maxAge: 60 * 60 * 24 * 14,
           })
-          .setCookie("user-info", JSON.stringify({
-            username: auth.username,
-            email: maskEmail(auth.email)
-          }), {
+          .setCookie("user-info", JSON.stringify(userInfo), {
             httpOnly: false,
             sameSite: "lax",
             path: "/",
@@ -127,7 +122,7 @@ export function authRoute(app: FastifyTypedInstance) {
           email: email,
           emailVerified: false,
           password: bcpassword,
-          role: "customer"
+          role: "customer",
         });
 
         return res.status(StatusCodes.CREATED).send({});

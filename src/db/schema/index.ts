@@ -1,11 +1,13 @@
-import { entrypoints } from "./entrypoints.ts";
-import { endpoints } from "./endpoints.ts";
+import { plans } from "./plans.ts";
+import { sessions } from "./sessions.ts";
+import { subscriptions } from "./subscriptions.ts";
 import { users } from "./users.ts";
 
-export { users, entrypoints, endpoints };
+export { users, sessions, plans, subscriptions };
 
 export const schema = {
   users,
-  entrypoints, 
-  endpoints
+  sessions,
+  plans,
+  subscriptions
 };

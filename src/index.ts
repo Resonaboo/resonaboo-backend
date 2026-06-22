@@ -8,8 +8,9 @@ import {
 import { fastifySwagger } from "@fastify/swagger";
 import fastifyCookie from "@fastify/cookie";
 import { fastifyCors } from "@fastify/cors";
+import fastifyUserAgent from "fastify-user-agent";
 import ScalarApiReference from "@scalar/fastify-api-reference";
-import { registerRoutes } from "#api";
+import { registerMiddlewares, registerRoutes } from "#api";
 import ck from "chalk";
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
@@ -20,7 +21,7 @@ app.setSerializerCompiler(serializerCompiler);
 await app.register(fastifyCookie, {
   //secret: "",
   hook: "onRequest",
-  parseOptions: {}
+  parseOptions: {},
 });
 
 await app.register(fastifyCors, {
@@ -29,6 +30,8 @@ await app.register(fastifyCors, {
   credentials: true,
   maxAge: 86400,
 });
+
+await app.register(fastifyUserAgent);
 
 await app.register(fastifySwagger, {
   openapi: {
@@ -46,6 +49,7 @@ await app.register(ScalarApiReference, {
 });
 
 // Rotas
+registerMiddlewares(app);
 registerRoutes(app);
 
 await app.ready();

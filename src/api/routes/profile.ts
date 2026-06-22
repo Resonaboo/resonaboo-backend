@@ -1,10 +1,11 @@
+import { getCredentials, recoverToken } from "#services";
 import type { FastifyTypedInstance } from "#types";
 import { StatusCodes } from "http-status-codes";
 import z from "zod";
 
-export function homeRoute(app: FastifyTypedInstance) {
+export function profileRoute(app: FastifyTypedInstance) {
   app.get(
-    "/api/dashboard",
+    "/api",
     {
       schema: {
         summary: "Hello, world!",
@@ -15,10 +16,21 @@ export function homeRoute(app: FastifyTypedInstance) {
             status: z.literal("success"),
             data: z.literal("Hello, world!"),
           }),
+          401: z.object({
+            error: z.literal("Invalid token"),
+          }),
         },
       },
     },
     async (req, res) => {
+      const userId = await getCredentials(req);
+
+      if (!userId)
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .send({ error: "Invalid token" });
+    
+          
       return res.status(StatusCodes.OK).send({
         status: "success",
         data: "Hello, world!",
