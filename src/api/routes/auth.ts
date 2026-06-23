@@ -43,8 +43,8 @@ export function authRoute(app: FastifyTypedInstance) {
         email,
         password,
         ip,
-        browser: userAgent.toAgent(),
-        os: userAgent.family,
+        browser: userAgent.family,
+        os: userAgent.os.family,
       });
 
       if (!auth)

@@ -11,7 +11,7 @@ export const subscriptions = pgTable("subscriptions", {
   fkPlanId: serial("fk_plan_id")
     .notNull()
     .references(() => plans.id, { onDelete: "cascade" }),
-  expireAt: timestamp("expire_at"),
+  expireAt: timestamp("expire_at").notNull(),
 });
 
 export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
