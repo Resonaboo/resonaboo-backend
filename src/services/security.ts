@@ -21,6 +21,11 @@ export type AuthInfo = {
   maskedEmail: string;
 };
 
+export type Credentials = {
+  sessionId: string;
+  userId: string;
+};
+
 function maskEmail(email: string) {
   const visibleCount = Math.min(4, email.length);
   return email.slice(0, visibleCount) + "*".repeat(email.length - visibleCount);
@@ -53,32 +58,45 @@ export function securityFilters(req: FastifyRequest) {
     throw new Exception(StatusCodes.UNAUTHORIZED, "Need to sign-in");
 }
 
-export async function getCredentials(req: FastifyRequest) {
+export async function getCredentials(
+  req: FastifyRequest,
+): Promise<Credentials> {
   const { cookies, userAgent } = req;
   const rawToken = cookies["auth-token"];
   if (typeof rawToken !== "string")
     throw new Exception(StatusCodes.UNAUTHORIZED, "Need sign-in");
 
   const sessionId = await recoverToken(rawToken);
-  if (!sessionId) throw new Exception(StatusCodes.UNAUTHORIZED, "Invalid session");
+  if (!sessionId)
+    throw new Exception(StatusCodes.UNAUTHORIZED, "Invalid session");
 
   const sessionQuery = await db
     .select()
     .from(sessions)
     .where(eq(sessions.id, sessionId));
-  if (sessionQuery.length === 0) throw new Exception(StatusCodes.UNAUTHORIZED, "Invalid session");
+  if (sessionQuery.length === 0)
+    throw new Exception(StatusCodes.UNAUTHORIZED, "Invalid session");
 
   const session = sessionQuery[0];
 
-  if (session.ip !== req.ip || session.os !== userAgent.family || session.browser !== userAgent.toAgent())
-    if (sessionQuery.length === 0) throw new Exception(StatusCodes.UNAUTHORIZED, "User agent info does not match with session");
+  if (
+    session.ip !== req.ip ||
+    session.os !== userAgent.family ||
+    session.browser !== userAgent.toAgent()
+  )
+    if (sessionQuery.length === 0)
+      throw new Exception(
+        StatusCodes.UNAUTHORIZED,
+        "User agent info does not match with session",
+      );
 
-  return session.fkUserId;
+  return {
+    sessionId: session.id,
+    userId: session.fkUserId,
+  };
 }
 
-export async function authenticateUser(
-  props: AuthProps,
-): Promise<AuthInfo> {
+export async function authenticateUser(props: AuthProps): Promise<AuthInfo> {
   const { email, password, ip, os, browser } = props;
 
   const usersQuery = await db
@@ -86,11 +104,13 @@ export async function authenticateUser(
     .from(users)
     .where(eq(users.email, email));
 
-  if (usersQuery.length === 0) throw new Exception(StatusCodes.UNAUTHORIZED, "Invalid credentials");
+  if (usersQuery.length === 0)
+    throw new Exception(StatusCodes.UNAUTHORIZED, "Invalid credentials");
 
   const user = usersQuery[0];
   const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) throw new Exception(StatusCodes.UNAUTHORIZED, "Invalid credentials");
+  if (!isPasswordValid)
+    throw new Exception(StatusCodes.UNAUTHORIZED, "Invalid credentials");
 
   const sessionInsert = await db
     .insert(sessions)

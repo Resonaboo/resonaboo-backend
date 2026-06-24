@@ -2,10 +2,10 @@ import type { FastifyTypedInstance } from "#types";
 import z from "zod";
 import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
-import { db, users } from "#db";
-import { authenticateUser } from "#services";
+import { db, sessions, users } from "#db";
+import { authenticateUser, getCredentials } from "#services";
 import { Exception } from "#utils";
-import { eq } from "drizzle-orm";
+import { eq, inArray, and } from "drizzle-orm";
 
 export function authRoute(app: FastifyTypedInstance) {
   const route = "/api/auth";
@@ -153,6 +153,46 @@ export function authRoute(app: FastifyTypedInstance) {
         })
         .status(StatusCodes.NO_CONTENT)
         .send({});
+    },
+  );
+
+  app.delete(
+    `${route}/delete-session`,
+    {
+      schema: {
+        summary: "delete-session",
+        description: "Delete a device session from user",
+        tags: ["auth"],
+        body: z.object({
+          sessionIds: z.array(z.string("Id can not be empty or null")),
+        }),
+        response: {
+          204: z.object({}),
+          400: z.object({
+            message: z.string(),
+          }),
+          500: z.object({
+            error: z.string(),
+            message: z.string(),
+          }),
+        },
+      },
+    },
+    async (req, res) => {
+      const { sessionId, userId } = await getCredentials(req);
+      const { sessionIds } = req.body;
+
+      const deletedSessions = await db
+        .delete(sessions)
+        .where(
+          and(inArray(sessions.id, sessionIds), eq(sessions.fkUserId, userId)),
+        )
+        .returning();
+
+      if (deletedSessions.length === 0)
+        throw new Exception(StatusCodes.NOT_FOUND, "No sessions id found");
+
+      return res.status(StatusCodes.NO_CONTENT).send({});
     },
   );
 }

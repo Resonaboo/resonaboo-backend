@@ -16,10 +16,18 @@ export function profileRoute(app: FastifyTypedInstance) {
         tags: ["subscription"],
         response: {
           200: z.object({
-            subscription: z.object({
-              name: z.string(),
-              expireAt: z.date(),
-            }).nullable(),
+            subscription: z
+              .object({
+                name: z.string(),
+                expireAt: z.date(),
+              })
+              .nullable(),
+            currentSession: z.object({
+              id: z.string(),
+              ip: z.string(),
+              os: z.string(),
+              browser: z.string(),
+            }),
             sessions: z.array(
               z.object({
                 id: z.string(),
@@ -40,7 +48,14 @@ export function profileRoute(app: FastifyTypedInstance) {
       },
     },
     async (req, res) => {
-      const userId = await getCredentials(req);
+      const sessionSchema = z.object({
+        id: z.string(),
+        ip: z.string(),
+        os: z.string(),
+        browser: z.string(),
+      });
+
+      const { sessionId, userId } = await getCredentials(req);
 
       const sessionsQuery = await db
         .select({
@@ -58,9 +73,13 @@ export function profileRoute(app: FastifyTypedInstance) {
         .innerJoin(plans, eq(plans.id, subscriptions.fkPlanId))
         .where(eq(subscriptions.fkUserId, userId));
 
+      const currentSession = sessionsQuery.find((s) => s.id === sessionId) as z.infer<typeof sessionSchema>;
+      const sessionList = sessionsQuery.filter((s) => s.id !== sessionId);
+
       return res.status(StatusCodes.OK).send({
         subscription: subscriptionQuery[0] ?? null,
-        sessions: sessionsQuery,
+        currentSession: currentSession,
+        sessions: sessionList,
       });
     },
   );
