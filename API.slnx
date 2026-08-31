@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Controllers/Controllers.csproj" />
+  <Project Path="Middlewares/Middlewares.csproj" />
+  <Project Path="Modules/Modules.csproj" />
+  <Project Path="Server/Server.csproj" />
+  <Project Path="Services/Services.csproj" />
+</Solution>

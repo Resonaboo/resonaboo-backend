@@ -1,0 +1,13 @@
+C:\Users\nathan\Documents\GitHub\Resonaboo\resonaboo-backend\Controllers\bin\Debug\net10.0\Controllers.deps.json
+C:\Users\nathan\Documents\GitHub\Resonaboo\resonaboo-backend\Controllers\bin\Debug\net10.0\Controllers.dll
+C:\Users\nathan\Documents\GitHub\Resonaboo\resonaboo-backend\Controllers\bin\Debug\net10.0\Controllers.pdb
+C:\Users\nathan\Documents\GitHub\Resonaboo\resonaboo-backend\Controllers\obj\Debug\net10.0\Controllers.csproj.AssemblyReference.cache
+C:\Users\nathan\Documents\GitHub\Resonaboo\resonaboo-backend\Controllers\obj\Debug\net10.0\Controllers.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\nathan\Documents\GitHub\Resonaboo\resonaboo-backend\Controllers\obj\Debug\net10.0\Controllers.AssemblyInfoInputs.cache
+C:\Users\nathan\Documents\GitHub\Resonaboo\resonaboo-backend\Controllers\obj\Debug\net10.0\Controllers.AssemblyInfo.cs
+C:\Users\nathan\Documents\GitHub\Resonaboo\resonaboo-backend\Controllers\obj\Debug\net10.0\Controllers.csproj.CoreCompileInputs.cache
+C:\Users\nathan\Documents\GitHub\Resonaboo\resonaboo-backend\Controllers\obj\Debug\net10.0\Controllers.sourcelink.json
+C:\Users\nathan\Documents\GitHub\Resonaboo\resonaboo-backend\Controllers\obj\Debug\net10.0\Controllers.dll
+C:\Users\nathan\Documents\GitHub\Resonaboo\resonaboo-backend\Controllers\obj\Debug\net10.0\refint\Controllers.dll
+C:\Users\nathan\Documents\GitHub\Resonaboo\resonaboo-backend\Controllers\obj\Debug\net10.0\Controllers.pdb
+C:\Users\nathan\Documents\GitHub\Resonaboo\resonaboo-backend\Controllers\obj\Debug\net10.0\ref\Controllers.dll
