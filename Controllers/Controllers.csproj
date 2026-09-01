@@ -6,6 +6,8 @@
         <Nullable>enable</Nullable>
         <RootNamespace>Controllers</RootNamespace>
         <AssemblyName>Controllers</AssemblyName>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>

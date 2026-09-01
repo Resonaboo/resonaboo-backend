@@ -4,7 +4,7 @@ namespace Modules;
 
 public class MiddlewareModule
 {
-    public readonly RequestDelegate _next;
+    protected readonly RequestDelegate _next;
     
     public MiddlewareModule(RequestDelegate next)
     {
